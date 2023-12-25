@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+    <!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Artistic Typing Test</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            text-align: center;
+            margin: 20px;
+            background-color: #34495e; /* Background color */
+            color: #ecf0f1; /* Text color */
+        }
+
+        #header {
+            font-size: 2em;
+            margin-bottom: 20px;
+            color: #3498db; /* Header color */
+        }
+
+        #artwork {
+            font-size: 2em;
+            margin-bottom: 20px;
+            color: #e74c3c; /* Artwork color */
+        }
+
+        #text-container {
+            font-size: 1.5em;
+            margin-bottom: 20px;
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+
+        #user-input {
+            font-size: 1.2em;
+            padding: 10px;
+            margin-top: 20px;
+            width: 70%;
+            border: 2px solid #95a5a6;
+            border-radius: 6px;
+            color: #2c3e50; /* Input text color */
+        }
+
+        #end-test-btn {
+            font-size: 1em;
+            padding: 10px;
+            margin-top: 20px;
+            cursor: pointer;
+            background-color: #2ecc71; /* Button background color */
+            color: #fff; /* Button text color */
+            border: none;
+            border-radius: 6px;
+        }
+
+        #result {
+            margin-top: 20px;
+            font-weight: bold;
+            color: #ecf0f1;
+        }
+
+        #wpm-section,
+        #accuracy-section,
+        #rank-section {
+            margin-top: 20px;
+            display: flex;
+            justify-content: space-around;
+        }
+
+        label {
+            font-size: 1.2em;
+            font-weight: bold;
+            color: #3498db;
+        }
+
+        span {
+            font-size: 1.2em;
+            color: #3498db;
+        }
+
+        .current-word {
+            color: #e74c3c;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <div id="header">Artistic Typing Test</div>
+
+    <div id="artwork">
+        <pre>
+   _____ _           _____  _____ _____ _____ 
+  / ____| |         |  __ \|_   _|_   _|  __ \
+ | |  __| | ___  ___| |__) | | |   | | | |__) |
+ | | |_ | |/ _ \/ __|  _  /  | |   | | |  ___/
+ | |__| | |  __/ (__| | \ \ _| |_ _| |_| |    
+  \_____|_|\___|\___|_|  \_\_____|_____|_|    
+        </pre>
+    </div>
+
+    <div id="text-container">
+        <p id="text-to-type"></p>
+    </div>
+
+    <textarea id="user-input" placeholder="Start typing here..."></textarea>
+
+    <button id="end-test-btn" onclick="endTestManually()">End Test</button>
+
+    <div id="result"></div>
+
+    <div id="wpm-section">
+        <label for="wpm">WPM:</label>
+        <span id="wpm">0</span>
+    </div>
+
+    <div id="accuracy-section">
+        <label for="accuracy">Accuracy:</label>
+        <span id="accuracy">0%</span>
+    </div>
+
+    <div id="rank-section">
+        <label for="rank">Rank:</label>
+        <span id="rank">-</span>
+    </div>
+
+    <script>
+        
+        const sentences = [
+            // ... (previous sentences)
+            "A goal without a plan is just a wish.",
+            "Be yourself; everyone else is already taken.",
+            "In the end, we will remember not the words of our enemies, but the silence of our friends.",
+            "Two things are infinite: the universe and human stupidity; and I'm not sure about the universe.",
+            "To be yourself in a world that is constantly trying to make you something else is the greatest accomplishment.",
+            "Life is what happens when you're busy making other plans.",
+            "Get busy living or get busy dying.",
+            "You have within you right now, everything you need to deal with whatever the world can throw at you.",
+            "The only limit to our realization of tomorrow will be our doubts of today.",
+            "The only way to do great work is to love what you do.",
+            "If you believe in yourself and have dedication and pride, and never quit, you'll be a winner."
+            // Add more sentences as needed
+        ];
+        const ranks = [
+            { minWPM: 0, rank: "Beginner" },
+            { minWPM: 20, rank: "Novice" },
+            { minWPM: 40, rank: "Intermediate" },
+            { minWPM: 60, rank: "Advanced" },
+            { minWPM: 80, rank: "Expert" },
+            { minWPM: 100, rank: "Master" },
+        ];
+
+        const randomSentence = sentences[Math.floor(Math.random() * sentences.length)];
+        const textArray = randomSentence.split(' ');
+
+        let wordIndex = 0;
+        let startTime;
+        let endTime;
+
+        function startTest() {
+            startTime = new Date().getTime();
+            displayText();
+        }
+
+        function displayText() {
+            const textContainer = document.getElementById('text-to-type');
+            textContainer.innerHTML = textArray.map((word, index) => {
+                if (index === wordIndex) {
+                    return `<span class="current-word">${word}</span>`;
+                }
+                return word + ' ';
+            }).join('');
+        }
+
+        function endTest() {
+            endTime = new Date().getTime();
+            const totalTime = (endTime - startTime) / 1000;
+            const userInput = document.getElementById('user-input').value;
+            const userWords = userInput.trim().split(' ');
+
+            let correctWords = 0;
+            for (let i = 0; i < textArray.length; i++) {
+                if (textArray[i] === userWords[i]) {
+                    correctWords++;
+                }
+            }
+
+            const accuracy = (correctWords / textArray.length) * 100;
+            const wordsPerMinute = (userWords.length / totalTime) * 60;
+
+            const resultContainer = document.getElementById('result');
+            resultContainer.innerHTML = `Typing test completed!<br>
+                Accuracy: ${accuracy.toFixed(2)}%<br>
+                Words per minute: ${wordsPerMinute.toFixed(2)}`;
+
+            updateWPMAndAccuracy(wordsPerMinute, accuracy);
+            updateRank(wordsPerMinute);
+        }
+
+        function updateWPMAndAccuracy(wpm, acc) {
+            const wpmSpan = document.getElementById('wpm');
+            const accuracySpan = document.getElementById('accuracy');
+
+            wpmSpan.textContent = wpm.toFixed(2);
+            accuracySpan.textContent = acc.toFixed(2) + '%';
+        }
+
+        function updateRank(wpm) {
+            const rankSpan = document.getElementById('rank');
+            let userRank = "Unknown";
+
+            for (let i = 0; i < ranks.length; i++) {
+                if (wpm >= ranks[i].minWPM) {
+                    userRank = ranks[i].rank;
+                }
+            }
+
+            rankSpan.textContent = userRank;
+        }
+
+        function endTestManually() {
+            endTest();
+            document.getElementById('user-input').disabled = true;
+            document.getElementById('end-test-btn').disabled = true;
+        }
+
+        document.getElementById('user-input').addEventListener('input', function () {
+            const userInput = this.value.trim();
+            const userWords = userInput.split(' ');
+
+            if (userWords.length === textArray.length && userWords[userWords.length - 1] === textArray[userWords.length - 1]) {
+                endTest();
+                this.disabled = true;
+                document.getElementById('end-test-btn').disabled = true;
+            } else {
+                const currentWord = textArray[wordIndex];
+                const currentUserWord = userWords[wordIndex];
+
+                if (currentUserWord === currentWord) {
+                    wordIndex++;
+                    displayText();
+                }
+            }
+        });
+
+        startTest();
+    </script>
+</body>
+</html>
+
+    </script>
+</body>
+</html>
+
+</body>
+</html>
